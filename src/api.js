@@ -8,10 +8,10 @@ export class ApiError extends Error {
   }
 }
 
-async function requisicao(caminho, opcoes = {}) {
+async function requisicao(caminho, { headers: headersDaChamada, ...opcoes } = {}) {
   const resp = await fetch(`${BASE_URL}${caminho}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...opcoes,
+    headers: { 'Content-Type': 'application/json', ...headersDaChamada },
   });
 
   if (!resp.ok) {
@@ -24,14 +24,14 @@ async function requisicao(caminho, opcoes = {}) {
 
 export const apiGet = (caminho, opcoes) => requisicao(caminho, opcoes);
 
-export const apiPost = (caminho, dados) =>
-  requisicao(caminho, { method: 'POST', body: JSON.stringify(dados) });
+export const apiPost = (caminho, dados, opcoes) =>
+  requisicao(caminho, { ...opcoes, method: 'POST', body: JSON.stringify(dados) });
 
-export const apiPut = (caminho, dados) =>
-  requisicao(caminho, { method: 'PUT', body: JSON.stringify(dados) });
+export const apiPut = (caminho, dados, opcoes) =>
+  requisicao(caminho, { ...opcoes, method: 'PUT', body: JSON.stringify(dados) });
 
-export const apiDelete = (caminho) =>
-  requisicao(caminho, { method: 'DELETE' });
+export const apiDelete = (caminho, opcoes) =>
+  requisicao(caminho, { ...opcoes, method: 'DELETE' });
 
 export function mensagemDeErro(erro) {
   if (erro instanceof ApiError) {
