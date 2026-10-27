@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-
-const URL = 'http://localhost:3000/users';
+import { apiGet, apiPost, apiPut, apiDelete } from './api';
 
 export default function ListaUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -8,8 +7,7 @@ export default function ListaUsuarios() {
   const [editandoId, setEditandoId] = useState(null);
 
   async function carregar() {
-    const resp = await fetch(URL);
-    setUsuarios(await resp.json());
+    setUsuarios(await apiGet('/users'));
   }
 
   useEffect(() => {
@@ -19,17 +17,9 @@ export default function ListaUsuarios() {
   async function salvar(e) {
     e.preventDefault();
     if (editandoId) {
-      await fetch(`${URL}/${editandoId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome }),
-      });
+      await apiPut(`/users/${editandoId}`, { nome });
     } else {
-      await fetch(URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome }),
-      });
+      await apiPost('/users', { nome });
     }
     setNome('');
     setEditandoId(null);
@@ -37,7 +27,7 @@ export default function ListaUsuarios() {
   }
 
   async function excluir(id) {
-    await fetch(`${URL}/${id}`, { method: 'DELETE' });
+    await apiDelete(`/users/${id}`);
     carregar();
   }
 
