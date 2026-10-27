@@ -7,17 +7,20 @@ export default function ListaUsuarios() {
   const [editandoId, setEditandoId] = useState(null);
   const [erro, setErro] = useState(null);
 
-  async function carregar() {
+  async function carregar(signal) {
     try {
-      setUsuarios(await apiGet('/users'));
+      setUsuarios(await apiGet('/users', { signal }));
       setErro(null);
     } catch (e) {
+      if (e.name === 'AbortError') return; // cancelamento não é erro para o usuário
       setErro(mensagemDeErro(e));
     }
   }
 
   useEffect(() => {
-    carregar();
+    const controller = new AbortController();
+    carregar(controller.signal);
+    return () => controller.abort();
   }, []);
 
   async function salvar(e) {

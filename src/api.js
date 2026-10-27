@@ -22,7 +22,7 @@ async function requisicao(caminho, opcoes = {}) {
   return resp.json();
 }
 
-export const apiGet = (caminho) => requisicao(caminho);
+export const apiGet = (caminho, opcoes) => requisicao(caminho, opcoes);
 
 export const apiPost = (caminho, dados) =>
   requisicao(caminho, { method: 'POST', body: JSON.stringify(dados) });
