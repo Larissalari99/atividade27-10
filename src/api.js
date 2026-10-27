@@ -1,5 +1,13 @@
 export const BASE_URL = 'http://localhost:3000';
 
+export class ApiError extends Error {
+  constructor(status, statusText) {
+    super(statusText);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 async function requisicao(caminho, opcoes = {}) {
   const resp = await fetch(`${BASE_URL}${caminho}`, {
     headers: { 'Content-Type': 'application/json' },
@@ -7,7 +15,7 @@ async function requisicao(caminho, opcoes = {}) {
   });
 
   if (!resp.ok) {
-    throw new Error(`Erro ${resp.status}: ${resp.statusText}`);
+    throw new ApiError(resp.status, resp.statusText);
   }
 
   if (resp.status === 204) return null;
@@ -24,3 +32,13 @@ export const apiPut = (caminho, dados) =>
 
 export const apiDelete = (caminho) =>
   requisicao(caminho, { method: 'DELETE' });
+
+export function mensagemDeErro(erro) {
+  if (erro instanceof ApiError) {
+    if (erro.status === 404) return 'Recurso não encontrado';
+    if (erro.status === 500) return 'Erro no servidor';
+    return `Erro ${erro.status}`;
+  }
+  if (erro instanceof TypeError) return 'Falha de rede';
+  return 'Erro inesperado';
+}

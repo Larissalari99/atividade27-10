@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
-import { apiGet, apiPost, apiPut, apiDelete } from './api';
+import { apiGet, apiPost, apiPut, apiDelete, mensagemDeErro } from './api';
 
 export default function ListaUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [nome, setNome] = useState('');
   const [editandoId, setEditandoId] = useState(null);
+  const [erro, setErro] = useState(null);
 
   async function carregar() {
-    setUsuarios(await apiGet('/users'));
+    try {
+      setUsuarios(await apiGet('/users'));
+      setErro(null);
+    } catch (e) {
+      setErro(mensagemDeErro(e));
+    }
   }
 
   useEffect(() => {
@@ -16,19 +22,27 @@ export default function ListaUsuarios() {
 
   async function salvar(e) {
     e.preventDefault();
-    if (editandoId) {
-      await apiPut(`/users/${editandoId}`, { nome });
-    } else {
-      await apiPost('/users', { nome });
+    try {
+      if (editandoId) {
+        await apiPut(`/users/${editandoId}`, { nome });
+      } else {
+        await apiPost('/users', { nome });
+      }
+      setNome('');
+      setEditandoId(null);
+      carregar();
+    } catch (err) {
+      setErro(mensagemDeErro(err));
     }
-    setNome('');
-    setEditandoId(null);
-    carregar();
   }
 
   async function excluir(id) {
-    await apiDelete(`/users/${id}`);
-    carregar();
+    try {
+      await apiDelete(`/users/${id}`);
+      carregar();
+    } catch (err) {
+      setErro(mensagemDeErro(err));
+    }
   }
 
   function editar(u) {
@@ -38,6 +52,7 @@ export default function ListaUsuarios() {
 
   return (
     <>
+      {erro && <p role="alert">{erro}</p>}
       <form onSubmit={salvar}>
         <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome" required />
         <button type="submit">{editandoId ? 'Salvar' : 'Criar'}</button>
